@@ -4,844 +4,250 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10-Day PPL Program</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>10-Day PPL</title>
 <style>
-/* ── RESET & ROOT ── */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-:root {
-–bg: #080808;
-–yellow: #f5e642;
-–yellow-dim: #a89e1e;
-–card: #111111;
-–card-hover: #1a1a1a;
-–border: #222;
-–text: #f0f0f0;
-–muted: #555;
-–push: #f5e642;
-–pull: #42c8f5;
-–legs: #c842f5;
-–rest: #333;
-–deficit-good: #42f57e;
-–deficit-bad: #f54242;
-}
-
-html, body { height:100%; overflow-x:hidden; }
-
-body {
-background: var(–bg);
-color: var(–text);
-font-family: ‘DM Sans’, sans-serif;
-font-weight: 300;
-min-height: 100vh;
-}
-
-/* ── NOISE TEXTURE OVERLAY ── */
-body::before {
-content:’’;
-position:fixed; inset:0;
-background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘0.03’/%3E%3C/svg%3E”);
-pointer-events:none; z-index:0; opacity:0.4;
-}
-
-/* ── DEFICIT HEADER ── */
-.deficit-header {
-position: sticky; top:0; z-index:50;
-background: #0a0a0a;
-border-bottom: 1px solid #1a1a1a;
-padding: 14px 24px;
-display: flex; align-items: center; justify-content: space-between;
-gap: 16px;
-}
-
-.deficit-left { display:flex; flex-direction:column; gap:2px; }
-
-.deficit-label {
-font-family: ‘DM Mono’, monospace;
-font-size: 9px; letter-spacing: 0.2em;
-text-transform: uppercase; color: var(–muted);
-}
-
-.deficit-value {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 38px; line-height:1;
-color: var(–yellow);
-transition: color 0.3s;
-}
-.deficit-value.surplus { color: var(–deficit-bad); }
-.deficit-value.good { color: var(–deficit-good); }
-
-.deficit-meta {
-display:flex; gap:20px; align-items:center;
-}
-.deficit-stat { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
-.deficit-stat span:first-child {
-font-family:‘DM Mono’,monospace; font-size:9px;
-text-transform:uppercase; letter-spacing:0.15em; color:var(–muted);
-}
-.deficit-stat span:last-child {
-font-family:‘Bebas Neue’,sans-serif; font-size:22px; color:var(–text); line-height:1;
-}
-
-.header-title {
-position:absolute; left:50%; transform:translateX(-50%);
-font-family:‘Bebas Neue’,sans-serif; font-size:13px;
-letter-spacing:0.3em; color:var(–muted);
-text-transform:uppercase;
-}
-
-/* ── CALENDAR GRID ── */
-.calendar-wrap {
-padding: 28px 20px 40px;
-position: relative; z-index:1;
-}
-
-.calendar-title {
-font-family:‘Bebas Neue’,sans-serif;
-font-size: clamp(52px, 10vw, 96px);
-line-height:0.88; letter-spacing:-1px;
-margin-bottom: 28px;
-padding: 0 4px;
-}
-.calendar-title span { color: var(–yellow); }
-
-.calendar-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-gap: 12px;
-}
-
-/* ── DAY TILE ── */
-.day-tile {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 6px;
-padding: 18px 16px 16px;
-cursor: pointer;
-position: relative;
-overflow: hidden;
-min-height: 160px;
-display: flex; flex-direction:column; justify-content:space-between;
-transition: border-color 0.15s, transform 0.15s, background 0.15s;
-}
-.day-tile:hover { background: var(–card-hover); transform:translateY(-3px); }
-.day-tile.rest-tile { opacity:0.7; }
-.day-tile.rest-tile.no-action { cursor:default; }
-.day-tile.rest-tile.no-action:hover { transform:none; }
-
-/* type accent bar */
-.day-tile::before {
-content:’’;
-position:absolute; top:0; left:0; right:0; height:3px;
-}
-.day-tile.push-tile::before { background: var(–push); }
-.day-tile.pull-tile::before { background: var(–pull); }
-.day-tile.legs-tile::before { background: var(–legs); }
-.day-tile.rest-tile::before { background: var(–rest); }
-
-.tile-top { display:flex; justify-content:space-between; align-items:flex-start; }
-
-.tile-day-num {
-font-family:‘Bebas Neue’,sans-serif;
-font-size: 52px; line-height:1; color: #222;
-transition: color 0.15s;
-}
-.day-tile:hover .tile-day-num { color:#333; }
-.day-tile.done-tile .tile-day-num { color: var(–yellow); opacity:0.3; }
-
-.tile-weekday {
-font-family:‘DM Mono’,monospace;
-font-size:9px; letter-spacing:0.15em;
-text-transform:uppercase; color:var(–muted);
-text-align:right; margin-top:4px;
-}
-
-.tile-type {
-font-family:‘Bebas Neue’,sans-serif;
-font-size:22px; letter-spacing:0.5px;
-margin-top:8px;
-}
-.push-tile .tile-type { color:var(–push); }
-.pull-tile .tile-type { color:var(–pull); }
-.legs-tile .tile-type { color:var(–legs); }
-.rest-tile .tile-type { color:var(–muted); }
-
-.tile-focus {
-font-size:11px; color:var(–muted); margin-top:3px;
-line-height:1.4;
-}
-
-.tile-bottom { display:flex; flex-direction:column; gap:4px; }
-
-/* ── DONE STATE ── */
-.tile-done-badge {
-display:none;
-align-items:center; gap:6px;
-font-family:‘DM Mono’,monospace; font-size:10px;
-color:var(–yellow);
-}
-.day-tile.done-tile .tile-done-badge { display:flex; }
-
-.star-icon { font-size:14px; }
-
-.tile-deficit-display {
-font-family:‘Bebas Neue’,sans-serif;
-font-size:13px;
-color: var(–deficit-good);
-}
-.tile-deficit-display.surplus { color: var(–deficit-bad); }
-
-/* ── DAY DETAIL OVERLAY ── */
-.detail-overlay {
-display:none;
-position:fixed; inset:0; z-index:100;
-background: linear-gradient(135deg, #0d1b4d 0%, #1a0a3d 40%, #2d0a4d 100%);
-overflow-y:auto;
-animation: slideUp 0.25s cubic-bezier(0.4,0,0.2,1);
-}
-.detail-overlay.open { display:block; }
-
-@keyframes slideUp {
-from { transform:translateY(30px); opacity:0; }
-to { transform:translateY(0); opacity:1; }
-}
-
-.detail-inner { padding: 0 0 60px; min-height:100vh; }
-
-/* detail header */
-.detail-header {
-padding: 20px 24px 24px;
-border-bottom: 1px solid rgba(255,255,255,0.08);
-position:sticky; top:0; z-index:10;
-background: rgba(13,27,77,0.95);
-backdrop-filter: blur(12px);
-display:flex; align-items:center; justify-content:space-between;
-}
-
-.back-btn {
-background:none; border:1px solid rgba(255,255,255,0.15);
-border-radius:50px; padding:8px 18px;
-color:rgba(255,255,255,0.6); font-family:‘DM Mono’,monospace;
-font-size:11px; letter-spacing:0.1em; cursor:pointer;
-text-transform:uppercase; transition:all 0.15s;
-}
-.back-btn:hover { border-color:rgba(255,255,255,0.4); color:#fff; }
-
-.detail-day-label {
-font-family:‘Bebas Neue’,sans-serif;
-font-size:13px; letter-spacing:0.3em;
-color:rgba(255,255,255,0.4); text-transform:uppercase;
-}
-
-/* detail hero */
-.detail-hero { padding:28px 24px 20px; }
-
-.detail-type-badge {
-display:inline-block;
-font-family:‘DM Mono’,monospace; font-size:10px;
-letter-spacing:0.2em; text-transform:uppercase;
-padding:4px 12px; border-radius:20px; margin-bottom:12px;
-}
-.push-badge { background:rgba(245,230,66,0.15); color:var(–push); border:1px solid rgba(245,230,66,0.3); }
-.pull-badge { background:rgba(66,200,245,0.15); color:var(–pull); border:1px solid rgba(66,200,245,0.3); }
-.legs-badge { background:rgba(200,66,245,0.15); color:var(–legs); border:1px solid rgba(200,66,245,0.3); }
-
-.detail-title {
-font-family:‘Bebas Neue’,sans-serif;
-font-size: clamp(42px,8vw,72px); line-height:0.9;
-letter-spacing:-0.5px; color:#fff;
-}
-.detail-subtitle {
-margin-top:8px; font-size:13px;
-color:rgba(255,255,255,0.4); line-height:1.5;
-}
-
-/* ── EXERCISE TABLE ── */
-.exercise-section { padding:0 24px; }
-
-.section-heading {
-font-family:‘DM Mono’,monospace; font-size:9px;
-letter-spacing:0.25em; text-transform:uppercase;
-color:rgba(255,255,255,0.3); margin-bottom:12px;
-padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06);
-}
-
-.exercise-list { display:flex; flex-direction:column; gap:2px; margin-bottom:28px; }
-
-.ex-row {
-display:grid;
-grid-template-columns: 1fr auto auto;
-gap:12px; align-items:center;
-padding:12px 14px;
-background:rgba(255,255,255,0.04);
-border-radius:6px;
-border:1px solid rgba(255,255,255,0.05);
-transition: background 0.15s;
-}
-.ex-row:hover { background:rgba(255,255,255,0.07); }
-
-.ex-name {
-font-size:14px; color:rgba(255,255,255,0.85); font-weight:400;
-}
-.ex-note { font-size:11px; color:rgba(255,255,255,0.3); margin-top:2px; }
-
-.ex-sets {
-font-family:‘Bebas Neue’,sans-serif; font-size:20px;
-color:rgba(255,255,255,0.5); white-space:nowrap; text-align:right;
-}
-.ex-reps {
-font-family:‘Bebas Neue’,sans-serif; font-size:20px;
-color:#fff; white-space:nowrap; text-align:right; min-width:48px;
-}
-
-.optional-tag {
-display:inline-block; font-size:9px; font-family:‘DM Mono’,monospace;
-letter-spacing:0.1em; text-transform:uppercase;
-padding:2px 7px; border-radius:3px;
-background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.3);
-margin-left:6px; vertical-align:middle;
-}
-
-/* ── CALORIE LOG ── */
-.calorie-section {
-margin: 0 24px 24px;
-background:rgba(255,255,255,0.04);
-border:1px solid rgba(255,255,255,0.08);
-border-radius:10px; padding:20px;
-}
-
-.cal-grid {
-display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;
-}
-.cal-field { display:flex; flex-direction:column; gap:5px; }
-.cal-field.full { grid-column:1/-1; }
-
-.cal-label {
-font-family:‘DM Mono’,monospace; font-size:9px;
-letter-spacing:0.2em; text-transform:uppercase;
-color:rgba(255,255,255,0.35);
-}
-.cal-input {
-background:rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.1);
-border-radius:6px; padding:10px 12px;
-font-family:‘Bebas Neue’,sans-serif; font-size:24px;
-color:#fff; outline:none; width:100%;
-transition: border-color 0.15s;
-}
-.cal-input:focus { border-color:rgba(255,255,255,0.35); }
-.cal-input::placeholder { color:rgba(255,255,255,0.15); }
-
-.cal-unit {
-font-family:‘DM Mono’,monospace; font-size:9px;
-color:rgba(255,255,255,0.25); letter-spacing:0.1em;
-text-transform:uppercase; margin-top:2px;
-}
-
-.day-deficit-display {
-margin-top:14px; padding:14px;
-background:rgba(255,255,255,0.04);
-border-radius:6px; text-align:center;
-}
-.day-deficit-label {
-font-family:‘DM Mono’,monospace; font-size:9px;
-letter-spacing:0.2em; text-transform:uppercase;
-color:rgba(255,255,255,0.3); margin-bottom:4px;
-}
-.day-deficit-num {
-font-family:‘Bebas Neue’,sans-serif; font-size:42px;
-color: var(–deficit-good); line-height:1;
-transition: color 0.2s;
-}
-.day-deficit-num.surplus { color: var(–deficit-bad); }
-
-/* ── MARK DONE BUTTON ── */
-.done-section { padding:0 24px; }
-
-.mark-done-btn {
-width:100%; padding:16px;
-border-radius:8px; border:none; cursor:pointer;
-font-family:‘Bebas Neue’,sans-serif; font-size:22px;
-letter-spacing:1px; text-transform:uppercase;
-transition: all 0.2s;
-background:rgba(245,230,66,0.1);
-color:var(–yellow);
-border:1px solid rgba(245,230,66,0.25);
-}
-.mark-done-btn:hover { background:var(–yellow); color:#000; }
-.mark-done-btn.is-done {
-background: rgba(66,245,126,0.1);
-color: var(–deficit-good);
-border-color: rgba(66,245,126,0.25);
-}
-.mark-done-btn.is-done:hover {
-background: var(–deficit-good); color:#000;
-}
-
-/* ── CARDIO SECTION ── */
-.cardio-block {
-margin:0 24px 24px;
-padding:16px;
-border:1px dashed rgba(255,255,255,0.1);
-border-radius:8px;
-}
-.cardio-title {
-font-family:‘DM Mono’,monospace; font-size:9px;
-letter-spacing:0.2em; text-transform:uppercase;
-color:rgba(255,255,255,0.3); margin-bottom:10px;
-display:flex; align-items:center; gap:8px;
-}
-.cardio-title::after {
-content:‘OPTIONAL’;
-font-size:8px; padding:2px 6px;
-background:rgba(255,255,255,0.06); border-radius:3px;
-color:rgba(255,255,255,0.2);
-}
-.cardio-item {
-font-size:13px; color:rgba(255,255,255,0.5);
-padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04);
-line-height:1.5;
-}
-.cardio-item:last-child { border-bottom:none; }
-
-/* ── NOTES ── */
-.notes-section { padding:0 24px 8px; }
-.notes-textarea {
-width:100%; background:rgba(255,255,255,0.04);
-border:1px solid rgba(255,255,255,0.08); border-radius:8px;
-padding:14px; color:rgba(255,255,255,0.7);
-font-family:‘DM Sans’,sans-serif; font-size:13px;
-resize:none; height:80px; outline:none;
-transition: border-color 0.15s;
-}
-.notes-textarea:focus { border-color:rgba(255,255,255,0.2); }
-.notes-textarea::placeholder { color:rgba(255,255,255,0.15); }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width:4px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:#222; border-radius:2px; }
-
-@media(max-width:480px) {
-.calendar-grid { grid-template-columns: repeat(2, 1fr); }
-.cal-grid { grid-template-columns:1fr; }
-.deficit-meta { gap:12px; }
-}
+html,body{margin:0;padding:0;background:#090909!important;color:#f0f0f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;min-height:100vh;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+input,textarea{font-family:-apple-system,BlinkMacSystemFont,sans-serif;}
+::-webkit-input-placeholder{color:rgba(255,255,255,0.12);}
 </style>
-
 </head>
-<body>
+<body style="background:#090909;color:#f0f0f0;margin:0;padding:0;min-height:100vh;">
 
-<!-- ── DEFICIT HEADER ── -->
-
-<div class="deficit-header">
-  <div class="deficit-left">
-    <span class="deficit-label">10-Day Cumulative Deficit</span>
-    <div class="deficit-value" id="totalDeficit">0</div>
-  </div>
-  <div class="header-title">PPL PROGRAM</div>
-  <div class="deficit-meta">
-    <div class="deficit-stat">
-      <span>Burned Total</span>
-      <span id="totalBurned">0</span>
-    </div>
-    <div class="deficit-stat">
-      <span>Eaten Total</span>
-      <span id="totalEaten">0</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── CALENDAR ── -->
-
-<div class="calendar-wrap">
-  <div class="calendar-title">10<br><span>DAYS.</span></div>
-  <div class="calendar-grid" id="calendarGrid"></div>
-</div>
-
-<!-- ── DAY DETAIL OVERLAY ── -->
-
-<div class="detail-overlay" id="detailOverlay">
-  <div class="detail-inner" id="detailInner"></div>
-</div>
+<div id="root" style="background:#090909;min-height:100vh;"></div>
 
 <script>
-// ─────────────────────────────────────────────────────
-//  DATA
-// ─────────────────────────────────────────────────────
-const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const START_DAY = 2; // Tuesday = index 2
-
-function getWeekday(dayIndex) {
-  return WEEKDAYS[(START_DAY + dayIndex) % 7];
-}
-
-const PLAN = [
-  // ── DAY 1 · PUSH (light) ──
-  { type:'push', focus:'Chest · Shoulders · Triceps',
-    note:'Light weight, full range of motion. Re-establish motor patterns.',
-    exercises:[
-      { name:'DB Flat Press',           sets:'3', reps:'10', note:'Control the descent — 2 sec down' },
-      { name:'DB Incline Press',        sets:'3', reps:'10', note:'30–45° incline, elbows slightly tucked' },
-      { name:'DB Lateral Raise',        sets:'3', reps:'12', note:'Slight bend in elbow, raise to shoulder height' },
-      { name:'DB Overhead Press',       sets:'3', reps:'10', note:'Seated or standing, keep core tight' },
-      { name:'DB Tricep Kickback',      sets:'3', reps:'12', note:'Elbow stays high, full extension' },
-      { name:'DB Front Raise',          sets:'2', reps:'12', note:'Alternate arms, controlled tempo' },
-    ],
-    cardio:'10 min light walk or 5 min skip rope — keep HR under Zone 2'
-  },
-  // ── DAY 2 · PULL (light) ──
-  { type:'pull', focus:'Back · Biceps · Rear Delts',
-    note:'Focus on feeling the lat and mid-back, not just moving weight. Use assisted pull-up if needed.',
-    exercises:[
-      { name:'Pull-Ups',                sets:'3', reps:'5–6', note:'Dead hang start, full ROM — use assisted machine if needed' },
-      { name:'Lat Pulldown (machine)',  sets:'3', reps:'12',  note:'Wide grip, pull to upper chest, squeeze lats at bottom' },
-      { name:'DB Reverse Fly',          sets:'3', reps:'12',  note:'Bent over, arms wide — rear delt focus' },
-      { name:'DB Hammer Curl',          sets:'3', reps:'12',  note:'Neutral grip, no swinging' },
-      { name:'DB Bicep Curl',           sets:'2', reps:'12',  note:'Supinate at top, slow negative' },
-      { name:'Cable Face Pull',         sets:'2', reps:'15',  note:'Rope attachment, pull to forehead — external rotation' },
-    ],
-    cardio:'10 min easy cycling or 8 min brisk walk'
-  },
-  // ── DAY 3 · LEGS (light) ──
-  { type:'legs', focus:'Quads · Hamstrings · Glutes · Calves',
-    note:'Bodyweight or very light DBs. You will be sore — that\'s the point.',
-    exercises:[
-      { name:'DB Goblet Squat',         sets:'3', reps:'12', note:'Hold DB at chest, sit deep, knees track over toes' },
-      { name:'DB Romanian Deadlift',    sets:'3', reps:'10', note:'Hinge, not squat — feel hamstring stretch' },
-      { name:'DB Walking Lunge',        sets:'3', reps:'10', note:'Per leg, upright torso' },
-      { name:'DB Sumo Squat',           sets:'3', reps:'12', note:'Wide stance, toes out, DB between legs' },
-      { name:'Calf Raises (DB)',        sets:'3', reps:'20', note:'Slow up, pause at top, controlled down' },
-      { name:'Glute Bridge (DB)',       sets:'3', reps:'15', note:'DB on hips, drive through heels' },
-    ],
-    cardio:'10 min walk post-session — helps legs flush out faster'
-  },
-  // ── DAY 4 · REST ──
-  { type:'rest', focus:'Recovery + Easy Run',
-    note:'Stretch hips, hamstrings, chest and lats. Sleep is your biggest gains tool.',
-    exercises:[], cardio:'Running intervals — 90s run / 2min walk × 8 rounds. Zone 2–3 only. Flat route, easy effort. Post-run: calf stretch, hip flexor stretch, tibialis raises.'
-  },
-  // ── DAY 5 · PUSH (progressed) ──
-  { type:'push', focus:'Chest · Shoulders · Triceps',
-    note:'Slightly heavier than Day 1. Add one set where it felt easy.',
-    exercises:[
-      { name:'DB Flat Press',           sets:'4', reps:'10', note:'Add 1 set, keep same or slightly heavier weight' },
-      { name:'DB Incline Press',        sets:'3', reps:'10', note:'Try going slightly heavier if Day 1 felt easy' },
-      { name:'DB Arnold Press',         sets:'3', reps:'10', note:'Rotation on press — hits all 3 delt heads' },
-      { name:'DB Lateral Raise',        sets:'3', reps:'15', note:'Higher reps this time, light weight' },
-      { name:'DB Overhead Tricep Ext.', sets:'3', reps:'12', note:'Both hands on one DB, elbow stays fixed' },
-      { name:'DB Chest Fly',            sets:'3', reps:'12', note:'Wide arc, squeeze at top — pure chest stretch' },
-    ],
-    cardio:'12 min light jog or bike — Zone 2 only'
-  },
-  // ── DAY 6 · PULL (progressed) ──
-  { type:'pull', focus:'Back · Biceps · Rear Delts',
-    note:'More volume on lats this week. Push one more rep on pull-ups than Day 2.',
-    exercises:[
-      { name:'Pull-Ups',                sets:'4', reps:'5–7', note:'Add a set — aim for 1 more rep per set than Day 2' },
-      { name:'Lat Pulldown (machine)',  sets:'4', reps:'10',  note:'Go slightly heavier than Day 2, same controlled form' },
-      { name:'Seated Cable Row',        sets:'3', reps:'12',  note:'Machine or cable — elbows drive back, squeeze mid-back' },
-      { name:'DB Reverse Fly',          sets:'3', reps:'15',  note:'Higher reps, light weight — rear delt pump' },
-      { name:'DB Incline Curl',         sets:'3', reps:'12',  note:'Seated on incline bench — full bicep stretch' },
-      { name:'DB Zottman Curl',         sets:'3', reps:'10',  note:'Curl up palms up, rotate at top, lower palms down' },
-    ],
-    cardio:'10 min easy walk or light skip'
-  },
-  // ── DAY 7 · LEGS (progressed) ──
-  { type:'legs', focus:'Quads · Hamstrings · Glutes · Calves',
-    note:'You\'re over the initial soreness now. Push the weight a little.',
-    exercises:[
-      { name:'DB Goblet Squat',         sets:'4', reps:'12', note:'Add a set, heavier DB if possible' },
-      { name:'DB Romanian Deadlift',    sets:'4', reps:'10', note:'Heavier — pause at bottom stretch' },
-      { name:'DB Reverse Lunge',        sets:'3', reps:'10', note:'Per leg — more knee-friendly than forward lunge' },
-      { name:'DB Bulgarian Split Squat',sets:'3', reps:'8',  note:'Per leg — rear foot elevated, this will humble you' },
-      { name:'DB Stiff-Leg Deadlift',   sets:'3', reps:'12', note:'Less bend in knee than RDL, upper ham focus' },
-      { name:'Calf Raises (DB)',        sets:'4', reps:'20', note:'Add a set, same controlled tempo' },
-    ],
-    cardio:'10 min walk or light jog'
-  },
-  // ── DAY 8 · REST ──
-  { type:'rest', focus:'Recovery + Run',
-    note:'Active rest — light walk, stretch, foam roll. Eat your protein.',
-    exercises:[], cardio:'Running intervals — 2min run / 2min walk × 8–10 rounds (progress from Day 4 if ready). Zone 2–3. Post-run routine non-negotiable.'
-  },
-  // ── DAY 9 · PUSH (further progressed) ──
-  { type:'push', focus:'Chest · Shoulders · Triceps',
-    note:'Higher volume, compound-first approach. This is a real workout now.',
-    exercises:[
-      { name:'DB Flat Press',           sets:'4', reps:'12', note:'Rep goal increased — control the tempo' },
-      { name:'DB Incline Press',        sets:'4', reps:'10', note:'Progressive overload — go heavier than Day 5' },
-      { name:'DB Arnold Press',         sets:'3', reps:'12', note:'Heavier than Day 5 if form allows' },
-      { name:'DB Lateral Raise',        sets:'4', reps:'15', note:'Drop set on last set — go to failure then drop weight' },
-      { name:'DB Overhead Tricep Ext.', sets:'3', reps:'15', note:'Higher reps, lighter — pump the tricep' },
-      { name:'DB Chest Fly',            sets:'3', reps:'15', note:'Finisher — feel the stretch, not the weight' },
-    ],
-    cardio:'15 min jog or 10 min HIIT — your call'
-  },
-  // ── DAY 10 · LEGS (final) ──
-  { type:'legs', focus:'Quads · Hamstrings · Glutes · Calves',
-    note:'Final session. Go hard. Note your weights — this is your baseline.',
-    exercises:[
-      { name:'DB Goblet Squat',         sets:'4', reps:'15', note:'Higher reps — feel the burn in quads' },
-      { name:'DB Romanian Deadlift',    sets:'4', reps:'12', note:'Heaviest of the 10 days — note the weight' },
-      { name:'DB Bulgarian Split Squat',sets:'4', reps:'10', note:'Per leg — heavier than Day 7' },
-      { name:'DB Sumo Squat',           sets:'3', reps:'15', note:'Wide stance, deep — inner quad and adductor' },
-      { name:'DB Stiff-Leg Deadlift',   sets:'3', reps:'12', note:'Full stretch, controlled up' },
-      { name:'Calf Raises (DB)',        sets:'4', reps:'25', note:'Final push — slow and controlled all the way' },
-    ],
-    cardio:'15 min easy jog to finish the 10 days strong'
-  },
+var DAYS=[
+  {type:"push",focus:"Chest / Shoulders / Triceps",note:"Light weight. Re-establish motor patterns after 6 months. Control every rep.",
+   ex:[["DB Flat Press","3","10","2 sec descent, elbows slightly tucked"],["DB Incline Press","3","10","30-45 degrees, feel the upper chest stretch"],["DB Lateral Raise","3","12","Slight elbow bend, raise to shoulder height"],["DB Overhead Press","3","10","Seated, keep core braced throughout"],["DB Tricep Kickback","3","12","Elbow stays high, full extension at back"],["DB Front Raise","2","12","Alternate arms, slow and controlled"]],
+   cardio:"10 min light walk or 5 min skip rope. Keep HR Zone 2.",opt:true},
+  {type:"pull",focus:"Back / Biceps / Rear Delts",note:"Feel the lat contracting on every pull. Not just moving weight.",
+   ex:[["Pull-Ups","3","5-6","Dead hang start, full ROM. Assisted machine OK."],["Lat Pulldown","3","12","Wide grip, pull to upper chest, squeeze lats"],["DB Reverse Fly","3","12","Bent over, arms wide, rear delt focus"],["DB Hammer Curl","3","12","Neutral grip, no swinging"],["DB Bicep Curl","2","12","Supinate at top, slow on the way down"],["Cable Face Pull","2","15","Rope to forehead, external rotation at end"]],
+   cardio:"10 min easy bike or brisk walk.",opt:true},
+  {type:"legs",focus:"Quads / Hamstrings / Glutes / Calves",note:"Very light or bodyweight. You will be sore tomorrow - that is the point.",
+   ex:[["DB Goblet Squat","3","12","DB at chest, sit deep, knees track toes"],["DB Romanian Deadlift","3","10","Hinge not squat, feel hamstring stretch"],["DB Walking Lunge","3","10","Per leg, upright torso throughout"],["DB Sumo Squat","3","12","Wide stance, toes out, DB between legs"],["Calf Raises (DB)","3","20","Slow up, pause at top, controlled down"],["Glute Bridge (DB)","3","15","DB on hips, drive hard through heels"]],
+   cardio:"10 min walk after. Helps flush legs.",opt:true},
+  {type:"rest",focus:"Recovery + Easy Run",note:"Stretch hips, hamstrings, chest and lats. Sleep is your biggest gains tool.",
+   ex:[],cardio:"Running: 90s run / 2min walk x 8 rounds. Zone 2-3. Flat route. Post-run: calf stretch, hip flexor, tibialis raises x20.",opt:false},
+  {type:"push",focus:"Chest / Shoulders / Triceps",note:"Slightly heavier than Day 1. Add one set where it felt easy last time.",
+   ex:[["DB Flat Press","4","10","Add 1 set. Same or slightly heavier."],["DB Incline Press","3","10","Go heavier if Day 1 felt manageable"],["DB Arnold Press","3","10","Rotation on press, hits all 3 delt heads"],["DB Lateral Raise","3","15","Higher reps, lighter weight"],["DB Overhead Tricep Ext","3","12","Both hands one DB, elbow stays fixed"],["DB Chest Fly","3","12","Wide arc, squeeze at top"]],
+   cardio:"12 min light jog. Zone 2 only.",opt:true},
+  {type:"pull",focus:"Back / Biceps / Rear Delts",note:"More lat volume. Push 1 extra rep per set on pull-ups vs Day 2.",
+   ex:[["Pull-Ups","4","5-7","Add a set. Aim for 1 more rep than Day 2."],["Lat Pulldown","4","10","Heavier than Day 2, same controlled form"],["Seated Cable Row","3","12","Elbows drive back, squeeze mid-back hard"],["DB Reverse Fly","3","15","Higher reps, lighter weight"],["DB Incline Curl","3","12","Full bicep stretch at bottom"],["DB Zottman Curl","3","10","Curl up palms up, rotate at top, lower palms down"]],
+   cardio:"10 min easy walk or light skip.",opt:true},
+  {type:"legs",focus:"Quads / Hamstrings / Glutes / Calves",note:"Over the initial soreness now. Push the weight a little more.",
+   ex:[["DB Goblet Squat","4","12","Add a set, heavier DB if possible"],["DB Romanian Deadlift","4","10","Heavier, pause at bottom stretch"],["DB Reverse Lunge","3","10","Per leg. More knee-friendly than forward."],["DB Bulgarian Split Squat","3","8","Per leg. Rear foot elevated. Humbling."],["DB Stiff-Leg Deadlift","3","12","Less knee bend than RDL, upper ham focus"],["Calf Raises (DB)","4","20","Add a set, same controlled tempo"]],
+   cardio:"10 min walk or light jog.",opt:true},
+  {type:"rest",focus:"Recovery + Run",note:"Active rest. Light walk, stretch, foam roll. Eat your protein.",
+   ex:[],cardio:"Running: 2min run / 2min walk x 8-10 rounds. Progress from Day 4 if ready. Post-run routine non-negotiable.",opt:false},
+  {type:"push",focus:"Chest / Shoulders / Triceps",note:"Higher volume. Compound-first. This is a real workout now.",
+   ex:[["DB Flat Press","4","12","Rep goal up. Control tempo."],["DB Incline Press","4","10","Heavier than Day 5"],["DB Arnold Press","3","12","Heavier than Day 5 if form allows"],["DB Lateral Raise","4","15","Drop set on last - fail then drop weight"],["DB Overhead Tricep Ext","3","15","Higher reps, lighter - full pump"],["DB Chest Fly","3","15","Finisher. Feel the stretch."]],
+   cardio:"15 min jog or 10 min HIIT. Your call.",opt:true},
+  {type:"legs",focus:"Quads / Hamstrings / Glutes / Calves",note:"Final session. Go hard. Note every weight - this is your baseline.",
+   ex:[["DB Goblet Squat","4","15","Higher reps, feel the quad burn"],["DB Romanian Deadlift","4","12","Heaviest of 10 days. Write it down."],["DB Bulgarian Split Squat","4","10","Per leg. Heavier than Day 7."],["DB Sumo Squat","3","15","Wide stance, deep, inner quad focus"],["DB Stiff-Leg Deadlift","3","12","Full stretch, controlled up"],["Calf Raises (DB)","4","25","Final push. Slow all the way."]],
+   cardio:"15 min easy jog to finish 10 days strong.",opt:true}
 ];
 
-const TYPE_LABEL = { push:'PUSH', pull:'PULL', legs:'LEGS', rest:'REST' };
-const TYPE_BADGE = { push:'push-badge', pull:'pull-badge', legs:'legs-badge' };
-const TYPE_TILE  = { push:'push-tile', pull:'pull-tile', legs:'legs-tile', rest:'rest-tile' };
+var WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var TC={push:"#f0e040",pull:"#40c8f0",legs:"#c040f0",rest:"#3a3a3a"};
+var TN={push:"PUSH",pull:"PULL",legs:"LEGS",rest:"REST"};
 
-// ─────────────────────────────────────────────────────
-//  STORAGE
-// ─────────────────────────────────────────────────────
-function load() {
-  try { return JSON.parse(localStorage.getItem('ppl10') || '{}'); } catch { return {}; }
-}
-function save(d) {
-  try { localStorage.setItem('ppl10', JSON.stringify(d)); } catch {} }
+function store(){try{return JSON.parse(localStorage.getItem("ppl10gh")||"{}");}catch(e){return{};}}
+function persist(d){try{localStorage.setItem("ppl10gh",JSON.stringify(d));}catch(e){}}
 
-// ─────────────────────────────────────────────────────
-//  DEFICIT CALCULATIONS
-// ─────────────────────────────────────────────────────
-function calcDayDeficit(dayIdx) {
-  const s = load();
-  const burned   = parseFloat(s[`burned-${dayIdx}`])   || 0;
-  const workout  = parseFloat(s[`workout-${dayIdx}`])  || 0;
-  const intake   = parseFloat(s[`intake-${dayIdx}`])   || 0;
-  if (!burned && !intake) return null;
-  return (burned + workout) - intake;
+function deficit(i){
+  var s=store();
+  var b=parseFloat(s["b"+i])||0,w=parseFloat(s["w"+i])||0,e=parseFloat(s["e"+i])||0;
+  if(!b&&!e)return null;
+  return (b+w)-e;
 }
 
-function updateTotals() {
-  const s = load();
-  let totalBurned = 0, totalEaten = 0;
-  for (let i = 0; i < 10; i++) {
-    totalBurned += (parseFloat(s[`burned-${i}`]) || 0) + (parseFloat(s[`workout-${i}`]) || 0);
-    totalEaten  += parseFloat(s[`intake-${i}`]) || 0;
+function totals(){
+  var s=store(),tb=0,te=0;
+  for(var i=0;i<10;i++){tb+=(parseFloat(s["b"+i])||0)+(parseFloat(s["w"+i])||0);te+=parseFloat(s["e"+i])||0;}
+  return{burned:tb,eaten:te,def:tb-te};
+}
+
+function renderAll(){renderHeader();renderCal();}
+
+function renderHeader(){
+  var t=totals();
+  var defEl=document.getElementById("hdef");
+  var col=(!t.burned&&!t.eaten)?"#f0e040":t.def>=0?"#40e080":"#e04040";
+  var txt=(!t.burned&&!t.eaten)?"0 kcal":t.def>=0?("+"+t.def.toLocaleString()+" kcal"):(t.def.toLocaleString()+" kcal");
+  defEl.textContent=txt; defEl.style.color=col;
+  document.getElementById("hburn").textContent=t.burned?t.burned.toLocaleString():"0";
+  document.getElementById("heat").textContent=t.eaten?t.eaten.toLocaleString():"0";
+}
+
+function renderCal(){
+  var grid=document.getElementById("grid");
+  grid.innerHTML="";
+  var s=store();
+  for(var i=0;i<10;i++){
+    (function(idx){
+      var d=DAYS[idx];
+      var done=!!s["done"+idx];
+      var def=deficit(idx);
+      var clickable=d.type!=="rest"||!!d.cardio;
+      var tc=TC[d.type];
+
+      var tile=document.createElement("div");
+      tile.style.cssText="background:"+(done?"#141414":"#111")+";border:1px solid #222;border-top:3px solid "+tc+";border-radius:8px;padding:14px 14px 12px;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;"+(clickable?"cursor:pointer;":"cursor:default;opacity:"+(d.type==="rest"?"0.7":"1")+";");
+
+      var numColor=done?"rgba(240,224,64,0.3)":"#222";
+      var defBadge="";
+      if(done&&def!==null){
+        var dc=def>=0?"#40e080":"#e04040";
+        defBadge='<span style="font-size:11px;font-weight:700;color:'+dc+';">'+(def>=0?"+":"")+Math.round(def)+" kcal</span>";
+      }
+
+      tile.innerHTML=
+        '<div>'+
+          '<div style="font-size:42px;font-weight:900;line-height:1;color:'+numColor+';">'+(idx<9?"0":"")+(idx+1)+'</div>'+
+          '<div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#555;margin-top:2px;">'+WD[(2+idx)%7]+'</div>'+
+        '</div>'+
+        '<div>'+
+          '<div style="font-size:20px;font-weight:900;color:'+tc+';margin-top:4px;">'+TN[d.type]+'</div>'+
+          '<div style="font-size:10px;color:#555;margin-top:3px;line-height:1.35;">'+d.focus+'</div>'+
+        '</div>'+
+        (done?'<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#f0e040;margin-top:4px;"><span>&#11088;</span>'+defBadge+'</div>':'<div></div>');
+
+      if(clickable){tile.addEventListener("click",function(){openDay(idx);});}
+      grid.appendChild(tile);
+    })(i);
   }
-  const deficit = totalBurned - totalEaten;
-  document.getElementById('totalBurned').textContent = totalBurned ? totalBurned.toLocaleString() : '0';
-  document.getElementById('totalEaten').textContent  = totalEaten  ? totalEaten.toLocaleString()  : '0';
-  const el = document.getElementById('totalDeficit');
-  if (deficit === 0 && !totalBurned) {
-    el.textContent = '0'; el.className = 'deficit-value';
-  } else if (deficit >= 0) {
-    el.textContent = '+' + deficit.toLocaleString() + ' kcal';
-    el.className = 'deficit-value good';
-  } else {
-    el.textContent = deficit.toLocaleString() + ' kcal';
-    el.className = 'deficit-value surplus';
+}
+
+function openDay(idx){
+  var d=DAYS[idx];
+  var s=store();
+  var done=!!s["done"+idx];
+  var tc=TC[d.type];
+  var def=deficit(idx);
+
+  var exRows="";
+  for(var j=0;j<d.ex.length;j++){
+    var e=d.ex[j];
+    exRows+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:11px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.05);border-radius:6px;margin-bottom:4px;">'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-size:13px;color:rgba(255,255,255,0.88);font-weight:500;">'+e[0]+'</div>'+
+        (e[3]?'<div style="font-size:10px;color:rgba(255,255,255,0.28);margin-top:2px;line-height:1.4;">'+e[3]+'</div>':'')+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">'+
+        '<div style="font-size:17px;font-weight:700;color:rgba(255,255,255,0.4);">'+e[1]+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,0.2);">x</div>'+
+        '<div style="font-size:17px;font-weight:900;color:#fff;">'+e[2]+'</div>'+
+      '</div>'+
+    '</div>';
   }
-}
 
-// ─────────────────────────────────────────────────────
-//  CALENDAR RENDER
-// ─────────────────────────────────────────────────────
-function renderCalendar() {
-  const grid = document.getElementById('calendarGrid');
-  grid.innerHTML = '';
-  const s = load();
+  var defTxt=def===null?"--":(def>=0?"+"+Math.round(def):String(Math.round(def)));
+  var defCol=def===null?"rgba(255,255,255,0.2)":def>=0?"#40e080":"#e04040";
 
-  PLAN.forEach((day, i) => {
-    const tile = document.createElement('div');
-    const done = !!s[`done-${i}`];
-    tile.className = `day-tile ${TYPE_TILE[day.type]}${done ? ' done-tile' : ''}`;
+  var bv=s["b"+idx]||"",wv=s["w"+idx]||"",ev=s["e"+idx]||"",nv=s["n"+idx]||"";
 
-    const deficit = calcDayDeficit(i);
-    const defStr = deficit !== null
-      ? `<span class="tile-deficit-display${deficit < 0 ? ' surplus' : ''}">${deficit >= 0 ? '+' : ''}${Math.round(deficit)} kcal</span>`
-      : '';
-
-    tile.innerHTML = `
-      <div class="tile-top">
-        <div>
-          <div class="tile-day-num">${String(i+1).padStart(2,'0')}</div>
-          <div class="tile-weekday">${getWeekday(i)}</div>
-        </div>
-      </div>
-      <div>
-        <div class="tile-type">${TYPE_LABEL[day.type]}</div>
-        <div class="tile-focus">${day.focus}</div>
-      </div>
-      <div class="tile-bottom">
-        ${done ? `<div class="tile-done-badge"><span class="star-icon">⭐</span>${defStr}</div>` : ''}
-      </div>`;
-
-    if (day.type !== 'rest' || day.cardio) {
-      tile.addEventListener('click', () => openDetail(i));
-      tile.style.cursor = 'pointer';
-    }
-    grid.appendChild(tile);
-  });
-
-  updateTotals();
-}
-
-// ─────────────────────────────────────────────────────
-//  DETAIL VIEW
-// ─────────────────────────────────────────────────────
-function openDetail(dayIdx) {
-  const day = PLAN[dayIdx];
-  const s = load();
-  const done = !!s[`done-${dayIdx}`];
-
-  const exHTML = day.exercises.map(ex => `
-    <div class="ex-row">
-      <div>
-        <div class="ex-name">${ex.name}</div>
-        ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
-      </div>
-      <div class="ex-sets">${ex.sets} ×</div>
-      <div class="ex-reps">${ex.reps}</div>
-    </div>`).join('');
-
-  const cardioHTML = day.cardio ? `
-    <div class="cardio-block">
-      <div class="cardio-title">Cardio</div>
-      <div class="cardio-item">${day.cardio}</div>
-    </div>` : '';
-
-  const burned  = s[`burned-${dayIdx}`]  || '';
-  const workout = s[`workout-${dayIdx}`] || '';
-  const intake  = s[`intake-${dayIdx}`]  || '';
-  const notes   = s[`notes-${dayIdx}`]   || '';
-
-  const deficit = calcDayDeficit(dayIdx);
-  const defDisplay = deficit !== null
-    ? `<div class="day-deficit-num${deficit < 0 ? ' surplus' : ''}">${deficit >= 0 ? '+' : ''}${Math.round(deficit)}</div>`
-    : `<div class="day-deficit-num">—</div>`;
-
-  document.getElementById('detailInner').innerHTML = `
-    <div class="detail-header">
-      <button class="back-btn" onclick="closeDetail()">← Back</button>
-      <div class="detail-day-label">Day ${dayIdx+1} · ${getWeekday(dayIdx)}</div>
-      <div style="width:80px"></div>
-    </div>
-
-    <div class="detail-hero">
-      ${day.type !== 'rest' ? `<div class="detail-type-badge ${TYPE_BADGE[day.type]}">${TYPE_LABEL[day.type]} DAY</div>` : ''}
-      <div class="detail-title">${day.focus}</div>
-      <div class="detail-subtitle">${day.note}</div>
-    </div>
-
-    ${day.exercises.length ? `
-    <div class="exercise-section">
-      <div class="section-heading">Exercises</div>
-      <div class="exercise-list">${exHTML}</div>
-    </div>` : ''}
-
-    ${cardioHTML}
-
-    <div class="calorie-section">
-      <div class="section-heading" style="margin-bottom:14px">Calorie Log</div>
-      <div class="cal-grid">
-        <div class="cal-field">
-          <div class="cal-label">Apple Watch Daily Burn</div>
-          <input class="cal-input" type="number" placeholder="2400" value="${burned}"
-            id="inp-burned-${dayIdx}" oninput="saveCalories(${dayIdx})">
-          <div class="cal-unit">kcal — from watch activity ring</div>
-        </div>
-        <div class="cal-field">
-          <div class="cal-label">Workout Calories Burned</div>
-          <input class="cal-input" type="number" placeholder="300" value="${workout}"
-            id="inp-workout-${dayIdx}" oninput="saveCalories(${dayIdx})">
-          <div class="cal-unit">kcal — from workout session</div>
-        </div>
-        <div class="cal-field full">
-          <div class="cal-label">Daily Calorie Intake</div>
-          <input class="cal-input" type="number" placeholder="1800" value="${intake}"
-            id="inp-intake-${dayIdx}" oninput="saveCalories(${dayIdx})">
-          <div class="cal-unit">kcal — everything you ate today</div>
-        </div>
-      </div>
-      <div class="day-deficit-display">
-        <div class="day-deficit-label">Today's Deficit / Surplus</div>
-        <div id="day-deficit-num-${dayIdx}">${deficit !== null
-          ? `<div class="day-deficit-num${deficit < 0 ? ' surplus' : ''}">${deficit >= 0 ? '+' : ''}${Math.round(deficit)}</div>`
-          : `<div class="day-deficit-num">—</div>`}
-        </div>
-      </div>
-    </div>
-
-    <div class="notes-section">
-      <div class="section-heading" style="margin-bottom:8px">Session Notes</div>
-      <textarea class="notes-textarea" placeholder="How did it feel? Any pain? Weight used? Log everything…"
-        id="inp-notes-${dayIdx}" oninput="saveNotes(${dayIdx})">${notes}</textarea>
+  document.getElementById("daypage").innerHTML=
+    '<div style="position:sticky;top:0;z-index:10;background:rgba(12,21,64,0.97);border-bottom:1px solid rgba(255,255,255,0.07);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">'+
+      '<button onclick="goBack()" style="background:none;border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:7px 16px;color:rgba(255,255,255,0.6);font-size:11px;letter-spacing:.08em;cursor:pointer;text-transform:uppercase;">&#8592; Back</button>'+
+      '<div style="font-size:11px;letter-spacing:.25em;color:rgba(255,255,255,0.35);text-transform:uppercase;">DAY '+(idx+1)+' / '+WD[(2+idx)%7].toUpperCase()+'</div>'+
+      '<div style="width:70px;"></div>'+
+    '</div>'+
+    '<div style="padding:22px 16px 16px;">'+
+      '<div style="display:inline-block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:10px;background:'+tc+'20;color:'+tc+';border:1px solid '+tc+'40;">'+TN[d.type]+' DAY</div>'+
+      '<div style="font-size:30px;font-weight:900;color:#fff;line-height:1;">'+d.focus+'</div>'+
+      '<div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:8px;line-height:1.5;">'+d.note+'</div>'+
+    '</div>'+
+    (d.ex.length?'<div style="padding:0 16px 20px;"><div style="font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:10px;">Exercises</div>'+exRows+'</div>':'')+
+    (d.cardio?'<div style="margin:0 16px 20px;padding:14px;border:1px dashed rgba(255,255,255,0.12);border-radius:8px;"><div style="font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Cardio '+(d.opt?'<span style="font-size:7px;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.2);">OPTIONAL</span>':'')+'</div><div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">'+d.cardio+'</div></div>':'')+
+    '<div style="margin:0 16px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;">'+
+      '<div style="font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:12px;">Calorie Log</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+        '<div><div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:4px;">Watch Daily Burn</div><input id="ci-b" type="number" placeholder="2400" value="'+bv+'" oninput="saveC('+idx+')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:10px 11px;font-size:22px;font-weight:900;color:#fff;outline:none;width:100%;"><div style="font-size:8px;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-top:3px;">kcal activity ring</div></div>'+
+        '<div><div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:4px;">Workout Burn</div><input id="ci-w" type="number" placeholder="300" value="'+wv+'" oninput="saveC('+idx+')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:10px 11px;font-size:22px;font-weight:900;color:#fff;outline:none;width:100%;"><div style="font-size:8px;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-top:3px;">kcal from session</div></div>'+
+        '<div style="grid-column:1/-1;"><div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:4px;">Daily Intake</div><input id="ci-e" type="number" placeholder="1800" value="'+ev+'" oninput="saveC('+idx+')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:10px 11px;font-size:22px;font-weight:900;color:#fff;outline:none;width:100%;"><div style="font-size:8px;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-top:3px;">kcal everything eaten</div></div>'+
+      '</div>'+
+      '<div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.04);border-radius:6px;text-align:center;">'+
+        '<div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:3px;">Today Deficit / Surplus</div>'+
+        '<div id="livedef" style="font-size:36px;font-weight:900;line-height:1;color:'+defCol+';">'+defTxt+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="padding:0 16px 16px;">'+
+      '<div style="font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:8px;">Session Notes</div>'+
+      '<textarea id="ci-n" oninput="saveN('+idx+')" placeholder="Weight used, how it felt, any pain..." style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;color:rgba(255,255,255,0.7);font-size:13px;resize:none;height:76px;outline:none;">'+nv+'</textarea>'+
 
 ```
-</div>
-<br>
-<div class="done-section">
-  <button class="mark-done-btn${done ? ' is-done' : ''}" id="done-btn-${dayIdx}"
-    onclick="toggleDone(${dayIdx})">
-    ${done ? '⭐ Completed — Tap to Undo' : 'Mark Workout Complete'}
-  </button>
-</div>
-<br>`;
+'</div>'+
+'<div style="padding:0 16px 48px;">'+
+  '<button id="donebtn" onclick="toggleDone('+idx+')" style="width:100%;padding:15px;border-radius:8px;cursor:pointer;font-size:17px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:'+(done?"rgba(64,224,128,0.1)":"rgba(240,224,64,0.08)")+';color:'+(done?"#40e080":"#f0e040")+';border:1px solid '+(done?"rgba(64,224,128,0.25)":"rgba(240,224,64,0.25)")+';outline:none;">'+
+    (done?"&#11088; Completed - Tap to Undo":"Mark Workout Complete")+
+  '</button>'+
+'</div>';
 ```
 
-document.getElementById(‘detailOverlay’).classList.add(‘open’);
-document.getElementById(‘detailOverlay’).scrollTop = 0;
+document.getElementById(“calpage”).style.display=“none”;
+document.getElementById(“daypage”).style.display=“block”;
+document.getElementById(“daypage”).style.background=“linear-gradient(150deg,#0c1540 0%,#160c38 50%,#200a40 100%)”;
+document.getElementById(“daypage”).style.minHeight=“100vh”;
+window.scrollTo(0,0);
+window._curDay=idx;
 }
 
-function closeDetail() {
-document.getElementById(‘detailOverlay’).classList.remove(‘open’);
-renderCalendar();
+function goBack(){
+document.getElementById(“daypage”).style.display=“none”;
+document.getElementById(“calpage”).style.display=“block”;
+renderAll();
+window.scrollTo(0,0);
 }
 
-// ─────────────────────────────────────────────────────
-//  SAVE FUNCTIONS
-// ─────────────────────────────────────────────────────
-function saveCalories(dayIdx) {
-const s = load();
-s[`burned-${dayIdx}`]  = document.getElementById(`inp-burned-${dayIdx}`)?.value  || ‘’;
-s[`workout-${dayIdx}`] = document.getElementById(`inp-workout-${dayIdx}`)?.value || ‘’;
-s[`intake-${dayIdx}`]  = document.getElementById(`inp-intake-${dayIdx}`)?.value  || ‘’;
-save(s);
-
-// update day deficit display inline
-const deficit = calcDayDeficit(dayIdx);
-const el = document.getElementById(`day-deficit-num-${dayIdx}`);
-if (el) {
-if (deficit === null) {
-el.innerHTML = `<div class="day-deficit-num">—</div>`;
-} else {
-el.innerHTML = `<div class="day-deficit-num${deficit < 0 ? ' surplus' : ''}">${deficit >= 0 ? '+' : ''}${Math.round(deficit)}</div>`;
-}
-}
-updateTotals();
+function saveC(idx){
+var s=store();
+var b=document.getElementById(“ci-b”),w=document.getElementById(“ci-w”),e=document.getElementById(“ci-e”);
+if(b)s[“b”+idx]=b.value; if(w)s[“w”+idx]=w.value; if(e)s[“e”+idx]=e.value;
+persist(s);
+var def=deficit(idx);
+var el=document.getElementById(“livedef”);
+if(el){el.textContent=def===null?”–”:(def>=0?”+”+Math.round(def):String(Math.round(def)));el.style.color=def===null?“rgba(255,255,255,0.2)”:def>=0?”#40e080”:”#e04040”;}
+renderHeader();
 }
 
-function saveNotes(dayIdx) {
-const s = load();
-s[`notes-${dayIdx}`] = document.getElementById(`inp-notes-${dayIdx}`)?.value || ‘’;
-save(s);
+function saveN(idx){var s=store();var n=document.getElementById(“ci-n”);if(n)s[“n”+idx]=n.value;persist(s);}
+
+function toggleDone(idx){
+var s=store();s[“done”+idx]=!s[“done”+idx];persist(s);
+var btn=document.getElementById(“donebtn”);
+if(btn){
+var done=s[“done”+idx];
+btn.innerHTML=done?”⭐ Completed - Tap to Undo”:“Mark Workout Complete”;
+btn.style.background=done?“rgba(64,224,128,0.1)”:“rgba(240,224,64,0.08)”;
+btn.style.color=done?”#40e080”:”#f0e040”;
+btn.style.borderColor=done?“rgba(64,224,128,0.25)”:“rgba(240,224,64,0.25)”;
+}
+renderHeader();
 }
 
-function toggleDone(dayIdx) {
-const s = load();
-s[`done-${dayIdx}`] = !s[`done-${dayIdx}`];
-save(s);
-const btn = document.getElementById(`done-btn-${dayIdx}`);
-if (btn) {
-const isDone = s[`done-${dayIdx}`];
-btn.className = `mark-done-btn${isDone ? ' is-done' : ''}`;
-btn.textContent = isDone ? ‘⭐ Completed — Tap to Undo’ : ‘Mark Workout Complete’;
-}
-renderCalendar();
-}
+// INIT
+var root=document.getElementById(“root”);
+root.innerHTML=
+‘<div id="calpage" style="background:#090909;min-height:100vh;">’+
+‘<div style="position:sticky;top:0;z-index:50;background:#0d0d0d;border-bottom:1px solid #1c1c1c;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">’+
+‘<div>’+
+‘<div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#444;">10-Day Deficit</div>’+
+‘<div id="hdef" style="font-size:26px;font-weight:900;color:#f0e040;line-height:1;">0 kcal</div>’+
+‘</div>’+
+‘<div style="display:flex;gap:16px;">’+
+‘<div style="display:flex;flex-direction:column;align-items:flex-end;"><span style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#444;">Burned</span><span id="hburn" style="font-size:16px;font-weight:700;line-height:1;">0</span></div>’+
+‘<div style="display:flex;flex-direction:column;align-items:flex-end;"><span style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#444;">Eaten</span><span id="heat" style="font-size:16px;font-weight:700;line-height:1;">0</span></div>’+
+‘</div>’+
+‘</div>’+
+‘<div style="padding:20px 14px 40px;">’+
+‘<div style="font-size:60px;font-weight:900;line-height:0.9;letter-spacing:-2px;margin-bottom:22px;">10<br><span style="color:#f0e040;">DAYS.</span></div>’+
+‘<div id="grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>’+
+‘</div>’+
+‘</div>’+
+‘<div id="daypage" style="display:none;"></div>’;
 
-// ─────────────────────────────────────────────────────
-//  INIT
-// ─────────────────────────────────────────────────────
-renderCalendar();
+renderAll();
 </script>
 
 </body>
